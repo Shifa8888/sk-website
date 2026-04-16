@@ -173,6 +173,55 @@ const Login = ({ onLogin }: { onLogin: (email: string) => void }) => {
   );
 };
 
+// --- NOTIFICATIONS DATA ---
+const NOTIFICATIONS = [
+  {
+    id: 1,
+    title: 'New Member Joined',
+    message: 'James Wilson 121 just signed up for a Premium plan.',
+    time: '2 minutes ago',
+    icon: Users,
+    iconBg: 'bg-blue-500/15',
+    iconColor: 'text-blue-400',
+  },
+  {
+    id: 2,
+    title: 'Payment Received',
+    message: 'Monthly subscription payment of $99 received from VIP member.',
+    time: '15 minutes ago',
+    icon: DollarSign,
+    iconBg: 'bg-emerald-500/15',
+    iconColor: 'text-emerald-400',
+  },
+  {
+    id: 3,
+    title: 'Membership Expiring',
+    message: '5 members have memberships expiring within the next 3 days.',
+    time: '1 hour ago',
+    icon: Clock,
+    iconBg: 'bg-amber-500/15',
+    iconColor: 'text-amber-400',
+  },
+  {
+    id: 4,
+    title: 'New VIP Upgrade',
+    message: 'Sarah Parker upgraded from Premium to VIP plan.',
+    time: '3 hours ago',
+    icon: Crown,
+    iconBg: 'bg-orange-500/15',
+    iconColor: 'text-orange-400',
+  },
+  {
+    id: 5,
+    title: 'Inactive Members Alert',
+    message: '12 members have been inactive for over 30 days.',
+    time: 'Yesterday',
+    icon: Activity,
+    iconBg: 'bg-red-500/15',
+    iconColor: 'text-red-400',
+  },
+];
+
 // --- MAIN APP ---
 export default function App() {
   const [auth, setAuth] = useState<AuthState>({ isAuthenticated: false, user: null });
@@ -182,6 +231,8 @@ export default function App() {
   const [filterStatus, setFilterStatus] = useState<string>('All');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [readNotifs, setReadNotifs] = useState<number[]>([]);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -322,10 +373,72 @@ export default function App() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button className="relative p-2 hover:bg-zinc-800 rounded-lg transition-colors text-zinc-400 hover:text-white">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-orange-500 rounded-full" />
-            </button>
+            {/* Notification Bell */}
+            <div className="relative">
+              <button
+                onClick={() => setIsNotifOpen(o => !o)}
+                className="relative p-2 hover:bg-zinc-800 rounded-lg transition-colors text-zinc-400 hover:text-white"
+              >
+                <Bell className="w-5 h-5" />
+                {readNotifs.length < NOTIFICATIONS.length && (
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-orange-500 rounded-full" />
+                )}
+              </button>
+
+              <AnimatePresence>
+                {isNotifOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setIsNotifOpen(false)} />
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 top-full mt-2 w-80 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl shadow-black/50 z-50 overflow-hidden"
+                    >
+                      <div className="flex items-center justify-between px-4 py-3.5 border-b border-zinc-800">
+                        <div>
+                          <h4 className="text-sm font-bold text-white">Notifications</h4>
+                          <p className="text-xs text-zinc-500">{NOTIFICATIONS.length - readNotifs.length} unread</p>
+                        </div>
+                        <button
+                          onClick={() => setReadNotifs(NOTIFICATIONS.map(n => n.id))}
+                          className="text-xs text-orange-400 hover:text-orange-300 font-semibold transition-colors"
+                        >
+                          Mark all read
+                        </button>
+                      </div>
+                      <div className="max-h-80 overflow-y-auto divide-y divide-zinc-800/60">
+                        {NOTIFICATIONS.map(n => {
+                          const isRead = readNotifs.includes(n.id);
+                          return (
+                            <button
+                              key={n.id}
+                              onClick={() => setReadNotifs(r => r.includes(n.id) ? r : [...r, n.id])}
+                              className={cn(
+                                "w-full flex items-start gap-3 px-4 py-3.5 text-left hover:bg-zinc-800/50 transition-colors",
+                                !isRead && "bg-orange-500/5"
+                              )}
+                            >
+                              <div className={cn("w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5", n.iconBg)}>
+                                <n.icon className={cn("w-4 h-4", n.iconColor)} />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className={cn("text-sm font-semibold", isRead ? "text-zinc-400" : "text-white")}>{n.title}</p>
+                                <p className="text-xs text-zinc-500 mt-0.5 leading-relaxed">{n.message}</p>
+                                <p className="text-xs text-zinc-600 mt-1">{n.time}</p>
+                              </div>
+                              {!isRead && <div className="w-2 h-2 bg-orange-500 rounded-full flex-shrink-0 mt-2" />}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
+
             <div className="w-9 h-9 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center ml-1">
               <span className="text-sm font-bold text-orange-400">A</span>
             </div>
