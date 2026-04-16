@@ -263,8 +263,8 @@ export default function App() {
         <nav className="flex-1 p-3 space-y-1 mt-2">
           {[
             { icon: LayoutDashboard, label: 'Dashboard', active: true },
-            { icon: Users, label: 'Members', active: false },
-            { icon: Settings, label: 'Settings', active: false },
+            // { icon: Users, label: 'Members', active: false },
+            // { icon: Settings, label: 'Settings', active: false },
           ].map(({ icon: Icon, label, active }) => (
             <button key={label} className={cn(
               "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all",
